@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"crypto/md5"
 
-	k "github.com/aws/aws-sdk-go/service/kinesis"
+	"github.com/aws/aws-sdk-go-v2/service/kinesis/types"
 	"github.com/golang/protobuf/proto"
 )
 
@@ -49,11 +49,11 @@ func (a *Aggregator) Put(data []byte, partitionKey string) {
 	a.nbytes += len(data)
 }
 
-// Drain create an aggregated `kinesis.PutRecordsRequestEntry`
+// Drain create an aggregated `types.PutRecordsRequestEntry`
 // that compatible with the KCL's deaggregation logic.
 //
 // If you interested to know more about it. see: aggregation-format.md
-func (a *Aggregator) Drain() (*k.PutRecordsRequestEntry, error) {
+func (a *Aggregator) Drain() (*types.PutRecordsRequestEntry, error) {
 	if a.nbytes == 0 {
 		return nil, nil
 	}
@@ -69,7 +69,7 @@ func (a *Aggregator) Drain() (*k.PutRecordsRequestEntry, error) {
 	checkSum := h.Sum(nil)
 	aggData := append(magicNumber, data...)
 	aggData = append(aggData, checkSum...)
-	entry := &k.PutRecordsRequestEntry{
+	entry := &types.PutRecordsRequestEntry{
 		Data:         aggData,
 		PartitionKey: &a.pkeys[0],
 	}
@@ -84,11 +84,11 @@ func (a *Aggregator) clear() {
 }
 
 // Test if a given entry is aggregated record.
-func isAggregated(entry *k.PutRecordsRequestEntry) bool {
+func isAggregated(entry types.PutRecordsRequestEntry) bool {
 	return bytes.HasPrefix(entry.Data, magicNumber)
 }
 
-func extractRecords(entry *k.PutRecordsRequestEntry) (out []*k.PutRecordsRequestEntry) {
+func extractRecords(entry types.PutRecordsRequestEntry) (out []types.PutRecordsRequestEntry) {
 	src := entry.Data[len(magicNumber) : len(entry.Data)-md5.Size]
 	dest := new(AggregatedRecord)
 	err := proto.Unmarshal(src, dest)
@@ -97,7 +97,7 @@ func extractRecords(entry *k.PutRecordsRequestEntry) (out []*k.PutRecordsRequest
 	}
 	for i := range dest.Records {
 		r := dest.Records[i]
-		out = append(out, &k.PutRecordsRequestEntry{
+		out = append(out, types.PutRecordsRequestEntry{
 			Data:         r.GetData(),
 			PartitionKey: &dest.PartitionKeyTable[r.GetPartitionKeyIndex()],
 		})

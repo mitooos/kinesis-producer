@@ -4,9 +4,11 @@ import (
 	"errors"
 	"sync"
 	"testing"
+	"context"
 
-	"github.com/aws/aws-sdk-go/aws"
-	k "github.com/aws/aws-sdk-go/service/kinesis"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	k "github.com/aws/aws-sdk-go-v2/service/kinesis"
+	"github.com/aws/aws-sdk-go-v2/service/kinesis/types"
 )
 
 type responseMock struct {
@@ -20,7 +22,7 @@ type clientMock struct {
 	incoming  map[int][]string
 }
 
-func (c *clientMock) PutRecords(input *k.PutRecordsInput) (*k.PutRecordsOutput, error) {
+func (c *clientMock) PutRecords(ctx context.Context,input *k.PutRecordsInput, funcs ...func(*k.Options)) (*k.PutRecordsOutput, error) {
 	res := c.responses[c.calls]
 	for _, r := range input.Records {
 		c.incoming[c.calls] = append(c.incoming[c.calls], *r.PartitionKey)
@@ -61,7 +63,7 @@ var testCases = []testCase{
 				{
 					Error: nil,
 					Response: &k.PutRecordsOutput{
-						FailedRecordCount: aws.Int64(0),
+						FailedRecordCount: aws.Int32(0),
 					},
 				},
 			}},
@@ -79,13 +81,13 @@ var testCases = []testCase{
 				{
 					Error: nil,
 					Response: &k.PutRecordsOutput{
-						FailedRecordCount: aws.Int64(0),
+						FailedRecordCount: aws.Int32(0),
 					},
 				},
 				{
 					Error: nil,
 					Response: &k.PutRecordsOutput{
-						FailedRecordCount: aws.Int64(0),
+						FailedRecordCount: aws.Int32(0),
 					},
 				},
 			}},
@@ -104,8 +106,8 @@ var testCases = []testCase{
 				{
 					Error: nil,
 					Response: &k.PutRecordsOutput{
-						FailedRecordCount: aws.Int64(1),
-						Records: []*k.PutRecordsResultEntry{
+						FailedRecordCount: aws.Int32(1),
+						Records: []types.PutRecordsResultEntry{
 							{SequenceNumber: aws.String("3"), ShardId: aws.String("1")},
 							{ErrorCode: aws.String("400")},
 						},
@@ -114,7 +116,7 @@ var testCases = []testCase{
 				{
 					Error: nil,
 					Response: &k.PutRecordsOutput{
-						FailedRecordCount: aws.Int64(0),
+						FailedRecordCount: aws.Int32(0),
 					},
 				},
 			}},
@@ -133,13 +135,13 @@ var testCases = []testCase{
 				{
 					Error: nil,
 					Response: &k.PutRecordsOutput{
-						FailedRecordCount: aws.Int64(0),
+						FailedRecordCount: aws.Int32(0),
 					},
 				},
 				{
 					Error: nil,
 					Response: &k.PutRecordsOutput{
-						FailedRecordCount: aws.Int64(0),
+						FailedRecordCount: aws.Int32(0),
 					},
 				},
 			}},
