@@ -1,7 +1,13 @@
-module github.com/a8m/kinesis-producer
+module github.com/mitoos/kinesis-producer
+
+go 1.16
 
 require (
-	github.com/aws/aws-sdk-go v1.21.10
+	github.com/a8m/kinesis-producer v0.2.0
+	github.com/aws/aws-sdk-go v1.21.10 // indirect
+	github.com/aws/aws-sdk-go-v2 v1.3.4
+	github.com/aws/aws-sdk-go-v2/config v1.1.6
+	github.com/aws/aws-sdk-go-v2/service/kinesis v1.2.2
 	github.com/golang/protobuf v1.3.2
 	github.com/jpillora/backoff v0.0.0-20180909062703-3050d21c67d7
 	github.com/pkg/errors v0.8.1 // indirect
