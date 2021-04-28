@@ -21,7 +21,7 @@ func ExampleSimple() {
 	client := kinesis.NewFromConfig(cfg)
 
 	pr := New(&Config{
-		StreamName:   "facturas_items",
+		StreamName:   "test",
 		BacklogCount: 2000,
 		Client:       client,
 	})
