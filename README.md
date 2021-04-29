@@ -1,33 +1,46 @@
 # Amazon kinesis producer [![Build status][travis-image]][travis-url] [![License][license-image]][license-url] [![GoDoc][godoc-img]][godoc-url]
-> A KPL-like batch producer for Amazon Kinesis built on top of the official Go AWS SDK  
-and using the same aggregation format that [KPL][kpl-url] use.  
+
+> A KPL-like batch producer for Amazon Kinesis built on top of the official Go AWS SDK V2
+> and using the same aggregation format that [KPL][kpl-url] use.
 
 ### Useful links
+
 - [Documentation][godoc-url]
 - [Aggregation format][aggregation-format-url]
 - [Considerations When Using KPL Aggregation][kpl-aggregation]
 - [Consumer De-aggregation][de-aggregation]
 
 ### Example
+
 ```go
 package main
 
 import (
+	"log"
 	"time"
+	"context"
 
-	"github.com/sirupsen/logrus"
-	"github.com/a8m/kinesis-producer"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/kinesis"
+	"github.com/aws/aws-sdk-go-v2/service/kinesis"
+	"github.com/aws/aws-sdk-go-v2/config"
+	producer "github.com/mitooos/kinesis-producer"
 )
 
+
 func main() {
-	client := kinesis.New(session.New(aws.NewConfig()))
+	cfg, err := config.LoadDefaultConfig(context.TODO(),
+		config.WithRegion("us-west-2"),
+	)
+	if err != nil {
+	// handle error
+		log.Fatal(err)
+	}
+
+	client := kinesis.NewFromConfig(cfg)
+
 	pr := producer.New(&producer.Config{
 		StreamName:   "test",
 		BacklogCount: 2000,
-		Client:       client
+		Client:       client,
 	})
 
 	pr.Start()
@@ -36,7 +49,7 @@ func main() {
 	go func() {
 		for r := range pr.NotifyFailures() {
 			// r contains `Data`, `PartitionKey` and `Error()`
-			log.Error(r)
+			log.Printf("detected put failure, %v", r)
 		}
 	}()
 
@@ -44,7 +57,7 @@ func main() {
 		for i := 0; i < 5000; i++ {
 			err := pr.Put([]byte("foo"), "bar")
 			if err != nil {
-				log.WithError(err).Fatal("error producing")
+				log.Printf("error producing, %v", err)
 			}
 		}
 	}()
@@ -55,9 +68,11 @@ func main() {
 ```
 
 #### Specifying logger implementation
+
 `producer.Config` takes an optional `logging.Logger` implementation.
 
 ##### Using a custom logger
+
 ```go
 customLogger := &CustomLogger{}
 
@@ -95,6 +110,7 @@ kinesis-producer ships with three logger implementations.
 - `loggers.Zap` uses zap logger
 
 ### License
+
 MIT
 
 [godoc-url]: https://godoc.org/github.com/a8m/kinesis-producer
@@ -107,4 +123,3 @@ MIT
 [license-url]: LICENSE
 [travis-image]: https://img.shields.io/travis/a8m/kinesis-producer.svg?style=flat-square
 [travis-url]: https://travis-ci.org/a8m/kinesis-producer
-
