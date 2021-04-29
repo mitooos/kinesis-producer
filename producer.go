@@ -1,4 +1,4 @@
-// Package producer 
+// Package producer
 // Amazon kinesis producer
 // A KPL-like batch producer for Amazon Kinesis built on top of the official Go AWS SDK
 // and using the same aggregation format that KPL use.
@@ -8,12 +8,12 @@
 package producer
 
 import (
+	"context"
 	"crypto/md5"
 	"errors"
 	"fmt"
 	"sync"
 	"time"
-	"context"
 
 	k "github.com/aws/aws-sdk-go-v2/service/kinesis"
 	"github.com/aws/aws-sdk-go-v2/service/kinesis/types"

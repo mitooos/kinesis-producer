@@ -1,10 +1,10 @@
 package producer
 
 import (
+	"context"
 	"errors"
 	"sync"
 	"testing"
-	"context"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	k "github.com/aws/aws-sdk-go-v2/service/kinesis"
@@ -22,7 +22,7 @@ type clientMock struct {
 	incoming  map[int][]string
 }
 
-func (c *clientMock) PutRecords(ctx context.Context,input *k.PutRecordsInput, funcs ...func(*k.Options)) (*k.PutRecordsOutput, error) {
+func (c *clientMock) PutRecords(ctx context.Context, input *k.PutRecordsInput, funcs ...func(*k.Options)) (*k.PutRecordsOutput, error) {
 	res := c.responses[c.calls]
 	for _, r := range input.Records {
 		c.incoming[c.calls] = append(c.incoming[c.calls], *r.PartitionKey)
@@ -68,7 +68,7 @@ var testCases = []testCase{
 				},
 			}},
 		map[int][]string{
-			0: []string{"hello"},
+			0: {"hello"},
 		},
 	},
 	{
@@ -92,8 +92,8 @@ var testCases = []testCase{
 				},
 			}},
 		map[int][]string{
-			0: []string{"hello"},
-			1: []string{"world"},
+			0: {"hello"},
+			1: {"world"},
 		},
 	},
 	{
@@ -121,8 +121,8 @@ var testCases = []testCase{
 				},
 			}},
 		map[int][]string{
-			0: []string{"hello", "world"},
-			1: []string{"world"},
+			0: {"hello", "world"},
+			1: {"world"},
 		},
 	},
 	{
@@ -197,7 +197,7 @@ func TestNotify(t *testing.T) {
 	failed := 0
 	done := make(chan bool, 1)
 	go func() {
-		for _ = range p.NotifyFailures() {
+		for range p.NotifyFailures() {
 			failed++
 			wg.Done()
 		}

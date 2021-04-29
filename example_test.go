@@ -1,12 +1,12 @@
 package producer
 
 import (
+	"context"
 	"log"
 	"time"
-	"context"
 
-	"github.com/aws/aws-sdk-go-v2/service/kinesis"
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/kinesis"
 )
 
 func ExampleSimple() {
@@ -14,7 +14,7 @@ func ExampleSimple() {
 		config.WithRegion("us-west-2"),
 	)
 	if err != nil {
-	// handle error
+		// handle error
 		log.Fatal(err)
 	}
 
