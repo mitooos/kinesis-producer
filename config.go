@@ -1,10 +1,10 @@
 package producer
 
 import (
+	"context"
 	"log"
 	"os"
 	"time"
-	"context"
 
 	k "github.com/aws/aws-sdk-go-v2/service/kinesis"
 )

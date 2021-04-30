@@ -1,4 +1,4 @@
-package producer
+package main
 
 import (
 	"context"
@@ -7,9 +7,10 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/kinesis"
+	producer "github.com/mitooos/kinesis-producer"
 )
 
-func ExampleSimple() {
+func main() {
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
 		config.WithRegion("us-west-2"),
 	)
@@ -20,7 +21,7 @@ func ExampleSimple() {
 
 	client := kinesis.NewFromConfig(cfg)
 
-	pr := New(&Config{
+	pr := producer.New(&producer.Config{
 		StreamName:   "test",
 		BacklogCount: 2000,
 		Client:       client,
@@ -37,7 +38,7 @@ func ExampleSimple() {
 	}()
 
 	go func() {
-		for i := 0; i < 5000; i++ {
+		for i := 0; i < 5; i++ {
 			err := pr.Put([]byte("foo"), "bar")
 			if err != nil {
 				log.Printf("error producing, %v", err)
